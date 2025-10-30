@@ -1,0 +1,104 @@
+import java.awt.*;
+import java.io.*;
+import java.util.ArrayList;
+import javax.swing.*;
+
+public class AccountSaverGUI extends JFrame {
+    private JTextField txtAccount;
+    private JButton btnAdd, btnSave, btnClear;
+    private DefaultListModel<String> listModel;
+    private JList<String> listAccounts;
+
+    public AccountSaverGUI() {
+        setTitle("Account Saver");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 350);
+        setLocationRelativeTo(null);
+
+        // พื้นหลัง
+        getContentPane().setBackground(new Color(230, 240, 255));
+        setLayout(new BorderLayout(10, 10));
+
+        // ---------- ส่วนบน: ฟอร์มกรอก ----------
+        JPanel inputPanel = new JPanel(new FlowLayout());
+        inputPanel.setBackground(new Color(200, 220, 255));
+
+        JLabel lbl = new JLabel("Account Name:");
+        txtAccount = new JTextField(15);
+        btnAdd = new JButton("Add");
+        btnClear = new JButton("Clear");
+
+        inputPanel.add(lbl);
+        inputPanel.add(txtAccount);
+        inputPanel.add(btnAdd);
+        inputPanel.add(btnClear);
+
+        add(inputPanel, BorderLayout.NORTH);
+
+        // ---------- ส่วนกลาง: รายการบัญชี ----------
+        listModel = new DefaultListModel<>();
+        listAccounts = new JList<>(listModel);
+        listAccounts.setFont(new Font("Arial", Font.PLAIN, 14));
+        JScrollPane scrollPane = new JScrollPane(listAccounts);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Account List"));
+
+        add(scrollPane, BorderLayout.CENTER);
+
+        // ---------- ส่วนล่าง: ปุ่ม Save ----------
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setBackground(new Color(200, 220, 255));
+        btnSave = new JButton("Save to File");
+        bottomPanel.add(btnSave);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // ---------- Event Handling ----------
+        btnAdd.addActionListener(e -> addAccount());
+        btnSave.addActionListener(e -> saveAccounts());
+        btnClear.addActionListener(e -> clearList());
+
+        // Enter key = Add
+        txtAccount.addActionListener(e -> addAccount());
+    }
+
+    private void addAccount() {
+        String name = txtAccount.getText().trim();
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter an account name!");
+            return;
+        }
+        listModel.addElement(name);
+        txtAccount.setText("");
+    }
+
+    private void clearList() {
+        int confirm = JOptionPane.showConfirmDialog(this, "Clear all accounts?", 
+                "Confirm", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            listModel.clear();
+        }
+    }
+
+    private void saveAccounts() {
+        if (listModel.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No accounts to save!");
+            return;
+        }
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter("accounts.txt", true))) {
+            ArrayList<String> tempList = new ArrayList<>();
+            for (int i = 0; i < listModel.size(); i++) {
+                pw.println(listModel.getElementAt(i));
+                tempList.add(listModel.getElementAt(i));
+            }
+            JOptionPane.showMessageDialog(this,
+                    "Saved " + tempList.size() + " accounts to accounts.txt");
+            listModel.clear();
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new AccountSaverGUI().setVisible(true));
+    }
+}
