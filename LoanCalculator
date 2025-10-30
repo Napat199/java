@@ -1,0 +1,127 @@
+1  import java.awt.*;                    // ใช้คลาสจาก AWT เช่น Layout, Color, Container
+2  import java.awt.event.*;              // ใช้สำหรับจัดการเหตุการณ์ (event) เช่น คลิกปุ่ม
+3  import javax.swing.*;                 // ใช้คลาส GUI จาก Swing เช่น JFrame, JButton, JLabel
+4  import javax.swing.border.TitledBorder; // ใช้สร้างกรอบ (Border) ที่มีหัวข้อรอบ Panel
+
+// ===================== คลาสหลัก LoanCalculator =========================
+5  public class LoanCalculator extends JFrame { // สร้างคลาส LoanCalculator ที่สืบทอดจาก JFrame (หน้าต่าง GUI)
+
+6  // ประกาศตัวแปร JTextField สำหรับรับ/แสดงข้อมูลต่าง ๆ
+7  private JTextField jtfAnnualInterestRate = new JTextField(); // ช่องใส่อัตราดอกเบี้ยต่อปี
+8  private JTextField jtfNumberOfYears = new JTextField();       // ช่องใส่จำนวนปีที่กู้
+9  private JTextField jtfLoanAmount = new JTextField();          // ช่องใส่ยอดเงินที่กู้
+10 private JTextField jtfMonthlyPayment = new JTextField();      // ช่องแสดงยอดผ่อนรายเดือน
+11 private JTextField jtfTotalPayment = new JTextField();        // ช่องแสดงยอดรวมทั้งหมด
+
+13 // สร้างปุ่มสำหรับคำนวณ
+14 private JButton jbtComputeLoan = new JButton("Compute Payment");
+
+15 // ------------------- Constructor -------------------------
+16 public LoanCalculator() { // Constructor จะทำงานเมื่อสร้างวัตถุ LoanCalculator
+
+17     // สร้าง Panel แรก p1 สำหรับวาง Label และ TextField
+18     JPanel p1 = new JPanel(new GridLayout(5, 2)); // ใช้ GridLayout (5 แถว 2 คอลัมน์)
+19     p1.add(new JLabel("Annual Interest Rate")); // แถว 1: Label อัตราดอกเบี้ย
+20     p1.add(jtfAnnualInterestRate);              // ช่องใส่ค่าดอกเบี้ย
+21     p1.add(new JLabel("Number of Years"));      // แถว 2: Label จำนวนปี
+22     p1.add(jtfNumberOfYears);                   // ช่องใส่จำนวนปี
+23     p1.add(new JLabel("Loan Amount"));          // แถว 3: Label ยอดกู้
+24     p1.add(jtfLoanAmount);                      // ช่องใส่ยอดกู้
+25     p1.add(new JLabel("Monthly Payment"));      // แถว 4: Label ยอดผ่อนรายเดือน
+26     p1.add(jtfMonthlyPayment);                  // ช่องแสดงผลยอดผ่อนรายเดือน
+27     p1.add(new JLabel("Total Payment"));        // แถว 5: Label ยอดรวมทั้งหมด
+28     p1.add(jtfTotalPayment);                    // ช่องแสดงผลยอดรวม
+
+29     // ใส่กรอบรอบ p1 พร้อมหัวข้อ
+30     p1.setBorder(new TitledBorder("Enter loan amount, interest rate, and years"));
+
+31     // สร้าง Panel ที่สอง p2 สำหรับปุ่ม
+32     JPanel p2 = new JPanel(new FlowLayout(FlowLayout.RIGHT)); // ใช้ FlowLayout จัดชิดขวา
+33     p2.add(jbtComputeLoan);                                   // เพิ่มปุ่ม Compute Payment ลงใน p2
+
+34     // เพิ่ม Panel ทั้งสองลงใน JFrame หลัก
+35     add(p1, BorderLayout.CENTER); // p1 อยู่ตรงกลาง
+36     add(p2, BorderLayout.SOUTH);  // p2 อยู่ด้านล่าง
+
+38     // ผูกปุ่มกับ ActionListener (เหตุการณ์เมื่อกดปุ่ม)
+39     jbtComputeLoan.addActionListener(new ButtonListener());
+40 } // ปิด Constructor
+
+// ================== คลาสภายใน สำหรับจัดการเหตุการณ์ ==================
+41 private class ButtonListener implements ActionListener {
+42     @Override
+43     public void actionPerformed(ActionEvent e) { // เมธอดนี้จะทำงานเมื่อกดปุ่ม
+
+44         // ดึงค่าจาก TextField มาเก็บในตัวแปร
+45         double interest = Double.parseDouble(jtfAnnualInterestRate.getText());
+46         int year = Integer.parseInt(jtfNumberOfYears.getText());
+47         double loanAmount = Double.parseDouble(jtfLoanAmount.getText());
+
+48         // สร้างวัตถุ Loan (เก็บข้อมูลเงินกู้)
+49         Loan loan = new Loan(interest, year, loanAmount);
+
+50         // แสดงผลลัพธ์ที่คำนวณได้ในช่องข้อความ
+51         jtfMonthlyPayment.setText(String.format("%.2f", loan.getMonthlyPayment()));
+52         jtfTotalPayment.setText(String.format("%.2f", loan.getTotalPayment()));
+53     }
+54 }
+
+55 // ====================== main() =========================
+56 public static void main(String[] args) {
+57     LoanCalculator frame = new LoanCalculator();        // สร้างหน้าต่าง GUI
+58     frame.pack();                                       // จัดขนาดให้พอดีกับองค์ประกอบ
+59     frame.setTitle("LoanCalculator");                   // ตั้งชื่อหน้าต่าง
+60     frame.setLocationRelativeTo(null);                  // จัดให้อยู่ตรงกลางหน้าจอ
+61     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);// ปิดโปรแกรมเมื่อกด X
+62     frame.setVisible(true);                             // แสดงหน้าต่าง
+63 }
+64 } // ปิดคลาส LoanCalculator
+
+
+// ===================== คลาสคำนวณ Loan =========================
+65 public class Loan {
+66     private double annualInterestRate; // อัตราดอกเบี้ยต่อปี
+67     private int numberOfYears;         // จำนวนปีที่กู้
+68     private double loanAmount;         // จำนวนเงินที่กู้
+69     private java.util.Date loanDate;   // วันที่ทำสัญญาเงินกู้
+
+70     /** Constructor เริ่มต้น */
+71     public Loan() {
+72         this(2.5, 1, 1000); // เรียก constructor หลักด้วยค่าดีฟอลต์ (ดอกเบี้ย 2.5%, 1 ปี, 1000)
+73     }
+
+74     /** Constructor หลัก รับค่าจากภายนอก */
+75     public Loan(double annualInterestRate, int numberOfYears, double loanAmount) {
+76         this.annualInterestRate = annualInterestRate;
+77         this.numberOfYears = numberOfYears;
+78         this.loanAmount = loanAmount;
+79         loanDate = new java.util.Date(); // บันทึกวันที่ทำสัญญาเป็นวันที่ปัจจุบัน
+80     }
+
+81     /** Getter และ Setter ของแต่ละตัวแปร */
+82     public double getAnnualInterestRate() { return annualInterestRate; }
+83     public void setAnnualInterestRate(double annualInterestRate) { this.annualInterestRate = annualInterestRate; }
+84     public int getNumberOfYears() { return numberOfYears; }
+85     public void setNumberOfYears(int numberOfYears) { this.numberOfYears = numberOfYears; }
+86     public double getLoanAmount() { return loanAmount; }
+87     public void setLoanAmount(double loanAmount) { this.loanAmount = loanAmount; }
+
+88     /** เมธอดคำนวณยอดผ่อนต่อเดือน */
+89     public double getMonthlyPayment() {
+90         double monthlyInterestRate = annualInterestRate / 1200; // แปลงจาก % ต่อปี -> ดอกเบี้ยต่อเดือน
+91         double monthlyPayment =
+92             loanAmount * monthlyInterestRate /
+93             (1 - (1 / Math.pow(1 + monthlyInterestRate, numberOfYears * 12)));
+94         return monthlyPayment;
+95     }
+
+96     /** เมธอดคำนวณยอดรวมทั้งหมดที่ต้องจ่าย */
+97     public double getTotalPayment() {
+98         return getMonthlyPayment() * numberOfYears * 12; // รวมทั้งหมด = ผ่อนรายเดือน × จำนวนเดือน
+99     }
+
+100    /** คืนค่าวันที่ทำสัญญา */
+101    public java.util.Date getLoanDate() {
+102        return loanDate;
+103    }
+104 } // ปิดคลาส Loan
