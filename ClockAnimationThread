@@ -1,0 +1,141 @@
+import java.awt.*;
+import javax.swing.*;
+import java.util.*;
+
+public class ClockAnimationThread extends JFrame {
+    private StillClock clock = new StillClock();
+    
+    public ClockAnimationThread() {
+        add(clock);
+        
+        // Start the clock animation using Thread instead of Timer
+        Thread clockThread = new Thread() {
+            public void run() {
+                while (true) {
+                    // Set new time and repaint the clock to display current time
+                    clock.setCurrentTime();
+                    clock.repaint();
+                    
+                    // Delay for 1 second
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        };
+        clockThread.start(); // Start the thread
+    }
+    
+    public static void main(String[] args) {
+        JFrame frame = new ClockAnimationThread();
+        frame.setTitle("Clock Animation with Thread");
+        frame.setSize(300, 300);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+}
+
+class StillClock extends JPanel {
+    private int hour;
+    private int minute;
+    private int second;
+    
+    public StillClock() {
+        setCurrentTime();
+    }
+    
+    public StillClock(int hour, int minute, int second) {
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
+    }
+    
+    public int getHour() {
+        return hour;
+    }
+    
+    public void setHour(int hour) {
+        this.hour = hour;
+        repaint();
+    }
+    
+    public int getMinute() {
+        return minute;
+    }
+    
+    public void setMinute(int minute) {
+        this.minute = minute;
+        repaint();
+    }
+    
+    public int getSecond() {
+        return second;
+    }
+    
+    public void setSecond(int second) {
+        this.second = second;
+        repaint();
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        // Initialize clock parameters
+        int clockRadius = (int)(Math.min(getWidth(), getHeight()) * 0.8 * 0.5);
+        int xCenter = getWidth() / 2;
+        int yCenter = getHeight() / 2;
+        
+        // Draw circle
+        g.setColor(Color.black);
+        g.drawOval(xCenter - clockRadius, yCenter - clockRadius,
+                   2 * clockRadius, 2 * clockRadius);
+        g.drawString("12", xCenter - 8, yCenter - clockRadius + 15);
+        g.drawString("9", xCenter - clockRadius + 5, yCenter + 5);
+        g.drawString("3", xCenter + clockRadius - 12, yCenter + 5);
+        g.drawString("6", xCenter - 5, yCenter + clockRadius - 5);
+        
+        // Draw second hand (red)
+        int sLength = (int)(clockRadius * 0.8);
+        int xSecond = (int)(xCenter + sLength * Math.sin(second * (2 * Math.PI / 60)));
+        int ySecond = (int)(yCenter - sLength * Math.cos(second * (2 * Math.PI / 60)));
+        g.setColor(Color.red);
+        g.drawLine(xCenter, yCenter, xSecond, ySecond);
+        
+        // Draw minute hand (blue)
+        int mLength = (int)(clockRadius * 0.65);
+        int xMinute = (int)(xCenter + mLength * Math.sin(minute * (2 * Math.PI / 60)));
+        int yMinute = (int)(yCenter - mLength * Math.cos(minute * (2 * Math.PI / 60)));
+        g.setColor(Color.blue);
+        g.drawLine(xCenter, yCenter, xMinute, yMinute);
+        
+        // Draw hour hand (green)
+        int hLength = (int)(clockRadius * 0.5);
+        int xHour = (int)(xCenter + hLength * 
+                    Math.sin((hour % 12 + minute / 60.0) * (2 * Math.PI / 12)));
+        int yHour = (int)(yCenter - hLength * 
+                    Math.cos((hour % 12 + minute / 60.0) * (2 * Math.PI / 12)));
+        g.setColor(Color.green);
+        g.drawLine(xCenter, yCenter, xHour, yHour);
+        
+        // Display digital time
+        g.setColor(Color.black);
+        String timeStr = String.format("%02d:%02d:%02d", hour, minute, second);
+        g.drawString(timeStr, xCenter - 30, yCenter + clockRadius + 20);
+    }
+    
+    public void setCurrentTime() {
+        Calendar calendar = new GregorianCalendar();
+        this.hour = calendar.get(Calendar.HOUR_OF_DAY);
+        this.minute = calendar.get(Calendar.MINUTE);
+        this.second = calendar.get(Calendar.SECOND);
+    }
+    
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(300, 300);
+    }
+}
