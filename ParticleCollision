@@ -1,0 +1,48 @@
+// ParticleCollision.java
+import java.io.*;
+import java.util.*;
+
+public class ParticleCollision {
+    // class model not strictly required but per requirement we'll use OOP
+    static class Particle {
+        int energy;
+        Particle(int e){ energy = e; }
+    }
+
+    // greedy simulation per problem (N <= 1000, O(N^2) acceptable)
+    public static long totalEnergy(List<Particle> a) {
+        long total = 0;
+        while(a.size() > 1) {
+            int bestIdx = -1;
+            int bestDiff = -1;
+            for (int i = 0; i < a.size() - 1; i++) {
+                int diff = Math.abs(a.get(i).energy - a.get(i+1).energy);
+                if (diff > bestDiff) {
+                    bestDiff = diff;
+                    bestIdx = i;
+                }
+            }
+            if (bestIdx == -1) break;
+            total += bestDiff;
+            // remove both particles bestIdx and bestIdx+1
+            a.remove(bestIdx+1);
+            a.remove(bestIdx);
+        }
+        return total;
+    }
+
+    // for reading input like problem statement
+    public static void main(String[] args) throws Exception {
+        // Example runner: reads from stdin
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String s = br.readLine();
+        if (s == null) return;
+        int n = Integer.parseInt(s.trim());
+        List<Particle> list = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            int x = Integer.parseInt(br.readLine().trim());
+            list.add(new Particle(x));
+        }
+        System.out.println(totalEnergy(list));
+    }
+}
