@@ -1,0 +1,147 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.*;
+import javax.swing.Timer;
+
+public class TwoCountriesClockAnimation extends JFrame {
+    private StillClock thaiClock;
+    private StillClock japanClock;
+    
+    public TwoCountriesClockAnimation() {
+        setLayout(new GridLayout(1, 2, 10, 10));
+        
+        // Create Thailand clock (GMT+7)
+        thaiClock = new StillClock("Thailand", 7);
+        add(thaiClock);
+        
+        // Create Japan clock (GMT+9)
+        japanClock = new StillClock("Japan", 9);
+        add(japanClock);
+        
+        // Create a timer with delay 1000 ms
+        Timer timer = new Timer(1000, new TimerListener());
+        timer.start();
+    }
+    
+    private class TimerListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            thaiClock.setCurrentTime();
+            thaiClock.repaint();
+            japanClock.setCurrentTime();
+            japanClock.repaint();
+        }
+    }
+    
+    public static void main(String[] args) {
+        JFrame frame = new TwoCountriesClockAnimation();
+        frame.setTitle("Thailand and Japan Clock");
+        frame.setSize(500, 250);
+        frame.setLocationRelativeTo(null);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+}
+
+class StillClock extends JPanel {
+    private int hour;
+    private int minute;
+    private int second;
+    private String countryName;
+    private int timeZoneOffset;
+    
+    public StillClock(String countryName, int timeZoneOffset) {
+        this.countryName = countryName;
+        this.timeZoneOffset = timeZoneOffset;
+        setCurrentTime();
+    }
+    
+    public int getHour() {
+        return hour;
+    }
+    
+    public void setHour(int hour) {
+        this.hour = hour;
+        repaint();
+    }
+    
+    public int getMinute() {
+        return minute;
+    }
+    
+    public void setMinute(int minute) {
+        this.minute = minute;
+        repaint();
+    }
+    
+    public int getSecond() {
+        return second;
+    }
+    
+    public void setSecond(int second) {
+        this.second = second;
+        repaint();
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        // Initialize clock parameters
+        int clockRadius = (int)(Math.min(getWidth(), getHeight()) * 0.8 * 0.5);
+        int xCenter = getWidth() / 2;
+        int yCenter = getHeight() / 2;
+        
+        // Draw circle
+        g.setColor(Color.black);
+        g.drawOval(xCenter - clockRadius, yCenter - clockRadius,
+                   2 * clockRadius, 2 * clockRadius);
+        g.drawString("12", xCenter - 8, yCenter - clockRadius + 15);
+        g.drawString("9", xCenter - clockRadius + 5, yCenter + 5);
+        g.drawString("3", xCenter + clockRadius - 12, yCenter + 5);
+        g.drawString("6", xCenter - 5, yCenter + clockRadius - 5);
+        
+        // Draw country name and time
+        g.drawString(countryName, xCenter - 25, yCenter + clockRadius + 20);
+        String timeStr = String.format("%02d:%02d:%02d", hour, minute, second);
+        g.drawString(timeStr, xCenter - 30, yCenter + clockRadius + 35);
+        
+        // Draw second hand
+        int sLength = (int)(clockRadius * 0.8);
+        int xSecond = (int)(xCenter + sLength * Math.sin(second * (2 * Math.PI / 60)));
+        int ySecond = (int)(yCenter - sLength * Math.cos(second * (2 * Math.PI / 60)));
+        g.setColor(Color.red);
+        g.drawLine(xCenter, yCenter, xSecond, ySecond);
+        
+        // Draw minute hand
+        int mLength = (int)(clockRadius * 0.65);
+        int xMinute = (int)(xCenter + mLength * Math.sin(minute * (2 * Math.PI / 60)));
+        int yMinute = (int)(yCenter - mLength * Math.cos(minute * (2 * Math.PI / 60)));
+        g.setColor(Color.blue);
+        g.drawLine(xCenter, yCenter, xMinute, yMinute);
+        
+        // Draw hour hand
+        int hLength = (int)(clockRadius * 0.5);
+        int xHour = (int)(xCenter + hLength * 
+                    Math.sin((hour % 12 + minute / 60.0) * (2 * Math.PI / 12)));
+        int yHour = (int)(yCenter - hLength * 
+                    Math.cos((hour % 12 + minute / 60.0) * (2 * Math.PI / 12)));
+        g.setColor(Color.green);
+        g.drawLine(xCenter, yCenter, xHour, yHour);
+    }
+    
+    public void setCurrentTime() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        calendar.add(Calendar.HOUR_OF_DAY, timeZoneOffset);
+        
+        this.hour = calendar.get(Calendar.HOUR_OF_DAY);
+        this.minute = calendar.get(Calendar.MINUTE);
+        this.second = calendar.get(Calendar.SECOND);
+    }
+    
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(250, 250);
+    }
+}
