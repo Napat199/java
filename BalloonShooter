@@ -1,0 +1,158 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.Random;
+
+public class BalloonShooter extends JFrame {
+    public BalloonShooter() {
+        add(new BalloonPanel());
+    }
+    
+    public static void main(String[] args) {
+        BalloonShooter frame = new BalloonShooter();
+        frame.setTitle("Balloon Shooter Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 500);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
+
+class BalloonPanel extends JPanel {
+    private int gunX = 300;
+    private int gunY = 450;
+    private int gunAngle = 0;
+    
+    private int balloonX;
+    private int balloonY;
+    private int balloonRadius = 30;
+    
+    private int bulletX = -100;
+    private int bulletY = -100;
+    private boolean bulletActive = false;
+    private double bulletVX = 0;
+    private double bulletVY = 0;
+    
+    private int score = 0;
+    private Random random = new Random();
+    private Timer timer;
+    
+    public BalloonPanel() {
+        setBackground(Color.CYAN);
+        randomizeBalloon();
+        
+        timer = new Timer(20, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updateBullet();
+                checkCollision();
+                repaint();
+            }
+        });
+        timer.start();
+        
+        setFocusable(true);
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                int key = e.getKeyCode();
+                
+                if (key == KeyEvent.VK_LEFT) {
+                    gunAngle -= 5;
+                    if (gunAngle < -45) gunAngle = -45;
+                }
+                else if (key == KeyEvent.VK_RIGHT) {
+                    gunAngle += 5;
+                    if (gunAngle > 45) gunAngle = 45;
+                }
+                else if (key == KeyEvent.VK_UP && !bulletActive) {
+                    shootBullet();
+                }
+                repaint();
+            }
+        });
+    }
+    
+    private void randomizeBalloon() {
+        balloonX = random.nextInt(500) + 50;
+        balloonY = random.nextInt(200) + 50;
+    }
+    
+    private void shootBullet() {
+        bulletActive = true;
+        bulletX = gunX;
+        bulletY = gunY;
+        
+        double angleRad = Math.toRadians(gunAngle);
+        bulletVX = 10 * Math.sin(angleRad);
+        bulletVY = -10 * Math.cos(angleRad);
+    }
+    
+    private void updateBullet() {
+        if (bulletActive) {
+            bulletX += bulletVX;
+            bulletY += bulletVY;
+            bulletVY += 0.2; // Gravity
+            
+            if (bulletY > getHeight() || bulletX < 0 || bulletX > getWidth()) {
+                bulletActive = false;
+                bulletX = -100;
+                bulletY = -100;
+            }
+        }
+    }
+    
+    private void checkCollision() {
+        if (bulletActive) {
+            double distance = Math.sqrt(
+                Math.pow(bulletX - balloonX, 2) + 
+                Math.pow(bulletY - balloonY, 2)
+            );
+            
+            if (distance < balloonRadius + 5) {
+                score++;
+                bulletActive = false;
+                bulletX = -100;
+                bulletY = -100;
+                randomizeBalloon();
+            }
+        }
+    }
+    
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        // Draw score
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Score: " + score, 20, 30);
+        g.drawString("Use ← → to aim, ↑ to shoot", 20, 55);
+        
+        // Draw balloon
+        g.setColor(Color.RED);
+        g.fillOval(balloonX - balloonRadius, balloonY - balloonRadius, 
+                   balloonRadius * 2, balloonRadius * 2);
+        g.setColor(Color.DARK_GRAY);
+        g.drawLine(balloonX, balloonY + balloonRadius, 
+                   balloonX, balloonY + balloonRadius + 20);
+        
+        // Draw ground
+        g.setColor(Color.GREEN.darker());
+        g.fillRect(0, 460, getWidth(), 40);
+        
+        // Draw gun
+        g.setColor(Color.DARK_GRAY);
+        g.fillRect(gunX - 10, gunY, 20, 20);
+        
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(5));
+        g2d.rotate(Math.toRadians(gunAngle), gunX, gunY);
+        g2d.drawLine(gunX, gunY, gunX, gunY - 40);
+        g2d.rotate(-Math.toRadians(gunAngle), gunX, gunY);
+        
+        // Draw bullet
+        if (bulletActive) {
+            g.setColor(Color.BLACK);
+            g.fillOval((int)bulletX - 5, (int)bulletY - 5, 10, 10);
+        }
+    }
+}
