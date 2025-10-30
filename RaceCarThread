@@ -1,0 +1,94 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class RaceCarThread extends JFrame {
+    public RaceCarThread() {
+        add(new RaceCarPanel());
+    }
+    
+    public static void main(String[] args) {
+        RaceCarThread frame = new RaceCarThread();
+        frame.setTitle("Race Car with Thread");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 200);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
+
+class RaceCarPanel extends JPanel {
+    private int xBase = 0;
+    private int delay = 10; // Delay in milliseconds
+    private Thread animationThread;
+    
+    public RaceCarPanel() {
+        this.setFocusable(true);
+        
+        // Add key listener for speed control
+        this.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                // Ctrl + Plus = faster (decrease delay)
+                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_EQUALS) {
+                    if (delay > 5) {
+                        delay -= 5;
+                    }
+                }
+                // Ctrl + Minus = slower (increase delay)
+                else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_MINUS) {
+                    delay += 5;
+                }
+            }
+        });
+        
+        // Start animation using Thread instead of Timer
+        animationThread = new Thread() {
+            public void run() {
+                while (true) {
+                    repaint();
+                    
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        };
+        animationThread.start();
+    }
+    
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        int yBase = getHeight() - 20;
+        
+        if (xBase > getWidth()) {
+            xBase = -50;
+        } else {
+            xBase += 1;
+        }
+        
+        // Draw instruction
+        g.setColor(Color.BLACK);
+        g.drawString("Ctrl + Plus = Faster, Ctrl + Minus = Slower", 10, 20);
+        g.drawString("Current delay: " + delay + "ms", 10, 40);
+        
+        // Draw wheels (black)
+        g.setColor(Color.BLACK);
+        g.fillOval(xBase + 10, yBase - 10, 10, 10);
+        g.fillOval(xBase + 30, yBase - 10, 10, 10);
+        
+        // Draw car body (green)
+        g.setColor(Color.GREEN);
+        g.fillRect(xBase, yBase - 20, 50, 10);
+        
+        // Draw car roof (red)
+        g.setColor(Color.RED);
+        Polygon polygon = new Polygon();
+        polygon.addPoint(xBase + 10, yBase - 20);
+        polygon.addPoint(xBase + 20, yBase - 30);
+        polygon.addPoint(xBase + 30, yBase - 30);
+        polygon.addPoint(xBase + 40, yBase - 20);
+        g.fillPolygon(polygon);
+    }
+}
