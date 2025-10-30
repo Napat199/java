@@ -1,0 +1,82 @@
+// USDToCADConverter.java
+import java.awt.*;
+import javax.swing.*;
+
+public class USDToCADConverter extends JFrame {
+  private JTextField jtfUSD = new JTextField("100");
+  private JTextField jtfCAD = new JTextField();
+  private JButton jbtConvert = new JButton("Convert");
+  // fixed example rate
+  private double rate = 1.35; // 1 USD = 1.35 CAD
+
+  public USDToCADConverter() {
+    JPanel p = new JPanel(new GridLayout(2,2,6,6));
+    p.add(new JLabel("USD:"));
+    p.add(jtfUSD);
+    p.add(new JLabel("CAD:"));
+    p.add(jtfCAD);
+    add(p, BorderLayout.CENTER);
+    add(jbtConvert, BorderLayout.SOUTH);
+
+    jtfCAD.setEditable(false);
+    jbtConvert.addActionListener(e -> {
+      try {
+        double usd = Double.parseDouble(jtfUSD.getText());
+        jtfCAD.setText(String.format("%.2f", usd * rate));
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Invalid number");
+      }
+    });
+
+    pack();
+    setTitle("USD -> CAD Converter");
+    setLocationRelativeTo(null);
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+  }
+
+  public static void main(String[] args) {
+    SwingUtilities.invokeLater(() -> new USDToCADConverter().setVisible(true));
+  }
+}
+
+// USDToCADConverter.java
+import java.awt.*;
+import javax.swing.*;
+
+public class USDToCADConverter extends JFrame {
+  private JTextField jtfUSD = new JTextField("100");
+  private JTextField jtfCAD = new JTextField();
+  private JButton jbtConvert = new JButton("Convert");
+  // fixed example rate
+  private double rate = 1.35; // 1 USD = 1.35 CAD
+
+  public USDToCADConverter() {
+    JPanel p = new JPanel(new GridLayout(2,2,6,6));
+    p.add(new JLabel("USD:"));
+    p.add(jtfUSD);
+    p.add(new JLabel("CAD:"));
+    p.add(jtfCAD);
+    add(p, BorderLayout.CENTER);
+    add(jbtConvert, BorderLayout.SOUTH);
+
+    jtfCAD.setEditable(false);
+    jbtConvert.addActionListener(e -> {
+      try {
+        double usd = Double.parseDouble(jtfUSD.getText());
+        jtfCAD.setText(String.format("%.2f", usd * rate));
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Invalid number");
+      }
+    });
+
+    pack();
+    setTitle("USD -> CAD Converter");
+    setLocationRelativeTo(null);
+    setDefaultCloseOperation(EXIT_ON_CLOSE);
+  }
+
+  public static void main(String[] args) {
+    SwingUtilities.invokeLater(() -> new USDToCADConverter().setVisible(true));
+  }
+}
+
