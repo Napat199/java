@@ -1,0 +1,118 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class FourCarRaceThread extends JFrame {
+    public FourCarRaceThread() {
+        setLayout(new GridLayout(4, 1, 5, 5));
+        
+        add(new CarLanePanel(Color.RED, 8, "Car 1 (Red)"));
+        add(new CarLanePanel(Color.BLUE, 12, "Car 2 (Blue)"));
+        add(new CarLanePanel(Color.GREEN, 10, "Car 3 (Green)"));
+        add(new CarLanePanel(Color.ORANGE, 15, "Car 4 (Orange)"));
+    }
+    
+    public static void main(String[] args) {
+        FourCarRaceThread frame = new FourCarRaceThread();
+        frame.setTitle("Four Car Race with Thread");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 450);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
+
+class CarLanePanel extends JPanel {
+    private int xBase = 0;
+    private Color carColor;
+    private String carName;
+    private int speed;
+    private Thread animationThread;
+    
+    public CarLanePanel(Color carColor, int initialSpeed, String carName) {
+        this.carColor = carColor;
+        this.speed = initialSpeed;
+        this.carName = carName;
+        
+        // Add mouse listener to change speed
+        this.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                showSpeedDialog();
+            }
+        });
+        
+        // Start animation using Thread
+        animationThread = new Thread() {
+            public void run() {
+                while (true) {
+                    repaint();
+                    
+                    try {
+                        Thread.sleep(20); // Update every 20ms (50 FPS)
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        };
+        animationThread.start();
+    }
+    
+    private void showSpeedDialog() {
+        String input = JOptionPane.showInputDialog(this, 
+            "Enter speed for " + carName + " (1-20):", speed);
+        if (input != null) {
+            try {
+                int newSpeed = Integer.parseInt(input);
+                if (newSpeed >= 1 && newSpeed <= 20) {
+                    speed = newSpeed;
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Speed must be between 1 and 20");
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid number");
+            }
+        }
+    }
+    
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        int yBase = getHeight() / 2 + 10;
+        
+        // Update car position
+        if (xBase > getWidth()) {
+            xBase = -50;
+        } else {
+            xBase += speed;
+        }
+        
+        // Draw track line
+        g.setColor(Color.GRAY);
+        g.drawLine(0, yBase, getWidth(), yBase);
+        
+        // Draw car name and speed info
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 14));
+        g.drawString(carName + " - Speed: " + speed + " (Click to change)", 10, 20);
+        
+        // Draw wheels (black)
+        g.setColor(Color.BLACK);
+        g.fillOval(xBase + 10, yBase - 10, 10, 10);
+        g.fillOval(xBase + 30, yBase - 10, 10, 10);
+        
+        // Draw car body
+        g.setColor(carColor);
+        g.fillRect(xBase, yBase - 20, 50, 10);
+        
+        // Draw car roof
+        g.setColor(carColor.darker());
+        Polygon polygon = new Polygon();
+        polygon.addPoint(xBase + 10, yBase - 20);
+        polygon.addPoint(xBase + 20, yBase - 30);
+        polygon.addPoint(xBase + 30, yBase - 30);
+        polygon.addPoint(xBase + 40, yBase - 20);
+        g.fillPolygon(polygon);
+    }
+}
