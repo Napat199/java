@@ -1,0 +1,107 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class FourCarRace extends JFrame {
+    public FourCarRace() {
+        setLayout(new GridLayout(4, 1, 5, 5));
+        
+        add(new RaceCarPanel(Color.RED, 8, "Car 1 (Speed: 8)"));
+        add(new RaceCarPanel(Color.BLUE, 12, "Car 2 (Speed: 12)"));
+        add(new RaceCarPanel(Color.GREEN, 10, "Car 3 (Speed: 10)"));
+        add(new RaceCarPanel(Color.ORANGE, 15, "Car 4 (Speed: 15)"));
+    }
+    
+    public static void main(String[] args) {
+        FourCarRace frame = new FourCarRace();
+        frame.setTitle("Four Car Race");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 400);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+}
+
+class RaceCarPanel extends JPanel {
+    private int xBase = 0;
+    private Timer timer;
+    private Color carColor;
+    private String carName;
+    private int speed;
+    
+    public RaceCarPanel(Color carColor, int initialSpeed, String carName) {
+        this.carColor = carColor;
+        this.speed = initialSpeed;
+        this.carName = carName;
+        this.timer = new Timer(20, new Listener());
+        timer.start();
+        
+        this.setFocusable(true);
+        this.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                showSpeedDialog();
+            }
+        });
+    }
+    
+    private void showSpeedDialog() {
+        String input = JOptionPane.showInputDialog(this, 
+            "Enter speed for " + carName + " (1-20):", speed);
+        if (input != null) {
+            try {
+                int newSpeed = Integer.parseInt(input);
+                if (newSpeed >= 1 && newSpeed <= 20) {
+                    speed = newSpeed;
+                } else {
+                    JOptionPane.showMessageDialog(this, 
+                        "Speed must be between 1 and 20");
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid number");
+            }
+        }
+    }
+    
+    class Listener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            repaint();
+        }
+    }
+    
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        int yBase = getHeight() / 2 + 10;
+        
+        if (xBase > getWidth()) {
+            xBase = -50;
+        } else {
+            xBase += speed;
+        }
+        
+        // Draw track line
+        g.setColor(Color.GRAY);
+        g.drawLine(0, yBase, getWidth(), yBase);
+        
+        // Draw car name and speed
+        g.setColor(Color.BLACK);
+        g.drawString(carName + " Speed: " + speed, 10, 15);
+        
+        // Draw wheels
+        g.setColor(Color.BLACK);
+        g.fillOval(xBase + 10, yBase - 10, 10, 10);
+        g.fillOval(xBase + 30, yBase - 10, 10, 10);
+        
+        // Draw car body
+        g.setColor(carColor);
+        g.fillRect(xBase, yBase - 20, 50, 10);
+        
+        // Draw car roof
+        g.setColor(carColor.darker());
+        Polygon polygon = new Polygon();
+        polygon.addPoint(xBase + 10, yBase - 20);
+        polygon.addPoint(xBase + 20, yBase - 30);
+        polygon.addPoint(xBase + 30, yBase - 30);
+        polygon.addPoint(xBase + 40, yBase - 20);
+        g.fillPolygon(polygon);
+    }
+}
